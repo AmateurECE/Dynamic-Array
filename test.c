@@ -7,7 +7,7 @@
  *
  * CREATED:	    04/16/2018
  *
- * LAST EDITED:	    04/21/2018
+ * LAST EDITED:	    04/22/2018
  ***/
 
 /******************************************************************************
@@ -173,32 +173,32 @@ static int test_get() {
     log_fail(Line":test_get(2): should be NULL");
 
   /* Test 3 -- get(0) is valid */
-  /* TODO: Update incase of NULL return. */
-  if (*(int *)darray_get(array, 0) != 9)
+  if (darray_get(array, 0) == NULL
+      || *(int *)darray_get(array, 0) != 9)
     log_fail(Line":test_get(3): should be 9");
 
   /* Test 4 -- get(1) is valid */
-  /* TODO: Update incase of NULL return. */
-  if (*(int *)darray_get(array, 1) != 8)
+  if (darray_get(array, 1) == NULL
+      || *(int *)darray_get(array, 1) != 8)
     log_fail(Line":test_get(4): should be 8");
 
   /* Test 5 -- get(size + 1) == 0 */
-  /* TODO: Update incase of NULL return. */
-  if (*(int *)darray_get(array, darray_size(array) + 1) != 0)
+  if (darray_get(array, darray_size(array) + 1) == NULL
+      || *(int *)darray_get(array, darray_size(array) + 1) != 0)
     log_fail(Line":test_get(5): should be 0");
 
   /* Test 6 -- get(size + 512) == 0 */
   int old = array->landings;
-  /* TODO: Update incase of NULL return. */
-  if (*(int *)darray_get(array, darray_size(array) + 512) != 0)
+  if (darray_get(array, darray_size(array) + 512) == NULL
+      || *(int *)darray_get(array, darray_size(array) + 512) != 0)
     log_fail(Line":test_get(6): should be 0");
   if (array->landings != old)
     log_fail(Line":test_get(6): changed landings");
 
   /* Test 7 -- last = NULL; get(0)=get(0) */
   array->last = NULL;
-  /* TODO: Update incase of NULL return. */
-  if (*(int *)darray_get(array, 0) != 9)
+  if (darray_get(array, 0) == NULL
+      || *(int *)darray_get(array, 0) != 9)
     log_fail(Line":test_get(7): should be 9");
 
   return 0;
@@ -234,30 +234,30 @@ static int test_set() {
   num = 12;
   if (darray_set(array, 0, &num) != 0)
     log_fail(Line":test_set(2): darray_set did not return 0.");
-  /* TODO: Update incase of NULL return. */
-  if (*(int *)darray_get(array, 0) != 12)
+  if (darray_get(array, 0) == NULL
+      || *(int *)darray_get(array, 0) != 12)
     log_fail(Line":test_set(2): array[0] should be 12.");
 
   /* Test 3 */
   if (darray_set(array, 1, &num) != 0)
     log_fail(Line":test_set(3): darray_set did not return 0.");
-  /* TODO: Update incase of NULL return. */
-  if (*(int *)darray_get(array, 1) != 12)
+  if (darray_get(array, 1) == NULL
+      || *(int *)darray_get(array, 1) != 12)
     log_fail(Line":test_set(3): array[1] should be 12.");
 
   /* Test 4 */
   if (darray_set(array, darray_size(array) + 1, &num) != 0)
     log_fail(Line":test_set(4): darray_set did not return 0.");
-  /* TODO: Update incase of NULL return. */
-  if (*(int *)darray_get(array, darray_size(array) - 1) != 12)
+  if (darray_get(array, darray_size(array) - 1) == NULL
+      || *(int *)darray_get(array, darray_size(array) - 1) != 12)
     log_fail(Line":test_set(4): the last entry should be 12.");
 
   /* Test 5 */
   int onum = 15;
   if (darray_set(array, darray_size(array) + 512, &onum) != 0)
     log_fail(Line":test_set(5): darray_set did not return 0.");
-  /* TODO: Update incase of NULL return. */
-  if (*(int *)darray_get(array, darray_size(array) - 1) != 15)
+  if (darray_get(array, darray_size(array) - 1) == NULL
+      || *(int *)darray_get(array, darray_size(array) - 1) != 15)
     log_fail(Line":test_set(5): the last entry should be 15.");
 
   /* landings = NULL; set(0) <-- set(0) */
@@ -266,8 +266,8 @@ static int test_set() {
 		       */
   if (darray_set(array, 0, &onum) != 0)
     log_fail(Line":test_set(6): darray_set did not return 0.");
-  /* TODO: Update incase of NULL return. */
-  if (*(int *)darray_get(array, 0) != 15)
+  if (darray_get(array, 0) == NULL
+      || *(int *)darray_get(array, 0) != 15)
     log_fail(Line":test_set(6): array[0] should be 15.");
 
   return 0;

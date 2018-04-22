@@ -8,7 +8,7 @@
  *
  * CREATED:	    04/16/2018
  *
- * LAST EDITED:	    04/18/2018
+ * LAST EDITED:	    04/22/2018
  ***/
 
 #ifndef __ET_DARRAY_H__
@@ -56,7 +56,7 @@ typedef struct {
 extern darray * darray_create(void (*destroy)(void *));
 extern void * darray_get(darray * array, int index);
 extern int darray_set(darray * array, int index, void * data);
-extern void darray_destroy(darray * array);
+extern void darray_destroy(darray ** array);
 
 #endif /* __ET_DARRAY_H__ */
 

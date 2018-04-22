@@ -310,15 +310,29 @@ static int test_create() {
  *
  * RETURN:	    int -- 0 if the tests pass, 1 if they fail.
  *
- * NOTES:	    TODO: test_destroy
+ * NOTES:	    none.
  ***/
 static int test_destroy() {
-  /* Tests:
-   * (NULL inputs)
-   * destroy(real)
-   * destroy(empty)
-   */
-  return 1;
+
+  /* Test 1 */
+  darray_destroy(NULL);
+
+  /* Test 2 */
+  darray * array = NULL;
+  if ((array = prep_darray(0)) == NULL)
+    log_fail("\tby "Line":test_destroy(2)");
+  darray_destroy(&array);
+  if (array != NULL)
+    log_fail(Line":test_destroy(2): pointer should now be NULL.");
+
+  /* Test 3 */
+  if ((array = darray_create(free)) == NULL)
+    log_fail(Line":test_destroy(3): darray_create returned NULL.");
+  darray_destroy(&array);
+  if (array != NULL)
+    log_fail(Line":test_destroy(3): pointer should be NULL.");
+
+  return 0;
 }
 
 /******************************************************************************

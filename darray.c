@@ -16,16 +16,50 @@
 
 #include <stdio.h>
 
+#include "list.h"
 #include "darray.h"
 
 /******************************************************************************
  * API FUNCTIONS
  ***/
 
+/******************************************************************************
+ * FUNCTION:	    darray_create
+ *
+ * DESCRIPTION:	    Create a new darray structure and return a pointer to it.
+ *
+ * ARGUMENTS:	    destroy: (void (*)(void *)) User-defined function which
+ *			frees any memory used by a user field.
+ *
+ * RETURN:	    (darray *) -- Pointer to a new darray struct, or NULL.
+ *
+ * NOTES:	    none.
+ ***/
 darray * darray_create(void (*destroy)(void *))
 {
-  /* TODO: darray_create */
-  return NULL;
+  darray * array = NULL;
+  if ((array = malloc(sizeof(darray))) == NULL)
+    return NULL;
+
+  *array = (darray){
+    .buckets = list_create(destroy),
+    .size = 0,
+    .last = NULL,
+    .llanding = 0,
+    .stairs = 8,
+    .landings = 1
+  };
+
+  void ** land = NULL;
+  if ((land = calloc(8, sizeof(void *))) == NULL) {
+    list_destroy(&(array->buckets));
+    free(array);
+  }
+
+  list_insnxt(array->buckets,
+	      list_head(array->buckets),
+	      (void *)land);
+  return array;
 }
 
 void * darray_get(darray * array, int index)

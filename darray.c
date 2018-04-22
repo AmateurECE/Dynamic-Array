@@ -7,7 +7,7 @@
  *
  * CREATED:	    04/16/2018
  *
- * LAST EDITED:	    04/16/2018
+ * LAST EDITED:	    04/21/2018
  ***/
 
 /******************************************************************************
@@ -34,10 +34,10 @@ void * darray_get(darray * array, int index)
   return NULL;
 }
 
-void darray_set(darray * array, int index, void * data)
+int darray_set(darray * array, int index, void * data)
 {
   /* TODO: darray_set */
-  return;
+  return -1;
 }
 
 void darray_destroy(darray * array)

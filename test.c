@@ -7,7 +7,7 @@
  *
  * CREATED:	    04/16/2018
  *
- * LAST EDITED:	    04/18/2018
+ * LAST EDITED:	    04/21/2018
  ***/
 
 /******************************************************************************
@@ -41,6 +41,9 @@
 #	define CONFIG_LOG_FILENAME "./log.txt"
 #   endif
 
+#   define strify2(str) #str
+#   define strify1(str) strify2(str)
+#   define Line strify1(__LINE__)
 #   define log(...) fprintf(logfile, __VA_ARGS__)
 #   define log_fail(...) {			\
     log(__VA_ARGS__);				\
@@ -56,6 +59,9 @@
 
 #else /* CONFIG_TEST_LOG */
 
+#   define strify2(str)
+#   define strify1(str)
+#   define Line
 #   define log(...)
 #   define log_fail(...) { return 0; }
 
@@ -158,37 +164,37 @@ static int test_get() {
   /* Test 1 -- NULL input */
   darray * array = NULL;
   if (darray_get(array, 0) != NULL)
-    log_fail("test_get: 1 failed--not NULL");
+    log_fail(Line":test_get(1): not NULL");
 
   /* Test 2 -- index less than 0 */
   if ((array = prep_darray(0)) == NULL)
-    log_fail("\tFailure occurred in test_get: Test 2");
+    log_fail("\tby "Line":test_get(2)");
   if (darray_get(array, -1) != NULL)
-    log_fail("test_get: 2 failed--not NULL");
+    log_fail(Line":test_get(2): should be NULL");
 
   /* Test 3 -- get(0) is valid */
   if (*(int *)darray_get(array, 0) != 9)
-    log_fail("test_get: 3 failed--!9");
+    log_fail(Line":test_get(3): should be 9");
 
   /* Test 4 -- get(1) is valid */
   if (*(int *)darray_get(array, 1) != 8)
-    log_fail("test_get: 4 failed--!8");
+    log_fail(Line":test_get(4): should be 8");
 
   /* Test 5 -- get(size + 1) == 0 */
   if (*(int *)darray_get(array, darray_size(array) + 1) != 0)
-    log_fail("test_get: 5 failed--!0");
+    log_fail(Line":test_get(5): should be 0");
 
   /* Test 6 -- get(size + 512) == 0 */
   int old = array->landings;
   if (*(int *)darray_get(array, darray_size(array) + 512) != 0)
-    log_fail("test_get: 6 failed--!0");
+    log_fail(Line":test_get(6): should be 0");
   if (array->landings != old)
-    log_fail("test_get: 6 failed--changed landings");
+    log_fail(Line":test_get(6): changed landings");
 
   /* Test 7 -- last = NULL; get(0)=get(0) */
   array->last = NULL;
   if (*(int *)darray_get(array, 0) != 9)
-    log_fail("test_get: 7 failed--!9");
+    log_fail(Line":test_get(7): should be 9");
 
   return 0;
 }
@@ -209,15 +215,52 @@ static int test_set() {
 
   /* Test 1 NULL inputs */
   int num = 0;
-  if ((darray_set(NULL, 0, &num)))
+  darray * array = NULL;
+  if (darray_set(NULL, 0, &num) != -1)
+    log_fail(Line":test_set(1): darray_set did not return -1.");
+  if ((array = prep_darray(0)) == NULL)
+    log_fail("\tby "Line":test_set(1)");
+  if (darray_set(array, 0, NULL) != 0)
+    log_fail(Line":test_set(1): darray_set did not return 0.");
+  if (darray_get(array, 0) != NULL)
+    log_fail(Line":test_set(1): array[0] should be NULL.");
 
-  /* set(0) <-- Return valid
-   * set(1) <-- Return valid
-   * set(size + 1) <-- 0
-   * set(size + 512) <-- 0
-   * landings = NULL; set(0) <-- set(0)
-   */
-  return 1;
+  /* Test 2 */
+  num = 12;
+  if (darray_set(array, 0, &num) != 0)
+    log_fail(Line":test_set(2): darray_set did not return 0.");
+  if (*(int *)darray_get(array, 0) != 12)
+    log_fail(Line":test_set(2): array[0] should be 12.");
+
+  /* Test 3 */
+  if (darray_set(array, 1, &num) != 0)
+    log_fail(Line":test_set(3): darray_set did not return 0.");
+  if (*(int *)darray_get(array, 1) != 12)
+    log_fail(Line":test_set(3): array[1] should be 12.");
+
+  /* Test 4 */
+  if (darray_set(array, darray_size(array) + 1, &num) != 0)
+    log_fail(Line":test_set(4): darray_set did not return 0.");
+  if (*(int *)darray_get(array, darray_size(array) - 1) != 12)
+    log_fail(Line":test_set(4): the last entry should be 12.");
+
+  /* Test 5 */
+  int onum = 15;
+  if (darray_set(array, darray_size(array) + 512, &onum) != 0)
+    log_fail(Line":test_set(5): darray_set did not return 0.");
+  if (*(int *)darray_get(array, darray_size(array) - 1) != 15)
+    log_fail(Line":test_set(5): the last entry should be 15.");
+
+  /* landings = NULL; set(0) <-- set(0) */
+  array->last = NULL; /* Here I am affecting the value of an internal
+		       * variable simply for the purpose of testing.
+		       */
+  if (darray_set(array, 0, &onum) != 0)
+    log_fail(Line":test_set(6): darray_set did not return 0.");
+  if (*(int *)darray_get(array, 0) != 15)
+    log_fail(Line":test_set(6): array[0] should be 15.");
+
+  return 0;
 }
 
 /******************************************************************************
@@ -229,7 +272,7 @@ static int test_set() {
  *
  * RETURN:	    int -- 0 if the tests pass, 1 if they fail.
  *
- * NOTES:	    none.
+ * NOTES:	    TODO: test_create
  ***/
 static int test_create() {
   /* Tests:
@@ -248,7 +291,7 @@ static int test_create() {
  *
  * RETURN:	    int -- 0 if the tests pass, 1 if they fail.
  *
- * NOTES:	    none.
+ * NOTES:	    TODO: test_destroy
  ***/
 static int test_destroy() {
   /* Tests:
@@ -274,7 +317,7 @@ static darray * prep_darray(int random)
 {
   darray * array = NULL;
   if ((array = darray_create(free)) == NULL) {
-    log("prep_darray: darray_create returned NULL\n");
+    log(Line":prep_darray: darray_create returned NULL\n");
     return NULL;
   }
 
@@ -291,7 +334,7 @@ static darray * prep_darray(int random)
   }
 
   if (darray_size(array) <= 0) {
-    log("prep_darray: darray_size is <= 0\n");
+    log(Line":prep_darray: darray_size is <= 0\n");
     return NULL;
   }
 

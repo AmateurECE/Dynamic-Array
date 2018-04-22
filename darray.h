@@ -27,12 +27,12 @@
 #define darray_size(darray) ((darray)->size)
 
 /* The number of stairs until we reach the next landing */
-#define darray_stairs(darray) /* TODO: darray_stairs */
+#define darray_stairs(darray) ((darray)->stairs)
 
 /* If we fell from our current height, the landing that we would end up on. */
-#define darray_landing(darray) /* TODO: darray_landing */
+#define darray_landing(darray) ((darray)->landings)
 
-#define darray_capacity(darray) /* TODO: darray_capacity */
+#define darray_capacity(darray) ((2 ** ((darray)->landings + 2)) - 8)
 
 /******************************************************************************
  * TYPE DEFINITIONS

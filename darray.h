@@ -8,7 +8,7 @@
  *
  * CREATED:	    04/16/2018
  *
- * LAST EDITED:	    04/22/2018
+ * LAST EDITED:	    04/29/2018
  ***/
 
 #ifndef __ET_DARRAY_H__
@@ -42,7 +42,7 @@ typedef struct {
 
   list * buckets;
   int size;
-  void ** last;
+  listelmt * last;
   int llanding;
   int stairs;
   int landings;

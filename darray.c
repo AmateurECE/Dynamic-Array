@@ -7,7 +7,7 @@
  *
  * CREATED:	    04/16/2018
  *
- * LAST EDITED:	    04/22/2018
+ * LAST EDITED:	    04/29/2018
  ***/
 
 /******************************************************************************
@@ -15,6 +15,8 @@
  ***/
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
 
 #include "list.h"
 #include "darray.h"
@@ -33,7 +35,7 @@
  *
  * RETURN:	    (darray *) -- Pointer to a new darray struct, or NULL.
  *
- * NOTES:	    none.
+ * NOTES:	    O(1)
  ***/
 darray * darray_create(void (*destroy)(void *))
 {
@@ -62,10 +64,41 @@ darray * darray_create(void (*destroy)(void *))
   return array;
 }
 
+/******************************************************************************
+ * FUNCTION:	    darray_get
+ *
+ * DESCRIPTION:	    Return the user field stored in the dynamic array at the
+ *		    index.
+ *
+ * ARGUMENTS:	    array: (darray *) -- Pointer to the array in question.
+ *		    index: (int) -- Index desired.
+ *
+ * RETURN:	    void * -- Pointer to the user field.
+ *
+ * NOTES:	    O(logn), E(1) for multiple sequential accesses.
+ ***/
 void * darray_get(darray * array, int index)
 {
-  /* TODO: darray_get */
-  return NULL;
+  if (array == NULL || index < 0)
+    return NULL;
+
+  /* Get the bucket number we're looking for */
+  listelmt * l = array->buckets->head;
+  int num = ((int)floor(log2(index)) >> 1) & 0xfe;
+
+  /* Check if we've been here before */
+  if (num == array->llanding && array->last != NULL)
+    l = array->last;
+  else
+    for (int i = num; i >= 0 && l != NULL; i--)
+      l = l->next;
+
+  if (l == NULL)
+    return NULL;
+
+  array->llanding = num;
+  array->last = l;
+  return ((void **)l->data)[index - num];
 }
 
 int darray_set(darray * array, int index, void * data)

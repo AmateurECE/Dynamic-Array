@@ -101,10 +101,43 @@ void * darray_get(darray * array, int index)
   return ((void **)l->data)[index - num];
 }
 
+/******************************************************************************
+ * FUNCTION:	    darray_set
+ *
+ * DESCRIPTION:	    Sets the element at the index `index' in `array'` to be the
+ *		    pointer `data.'
+ *
+ * ARGUMENTS:	    array: (darray *) -- The array we would like to mutate.
+ *		    index: (int) -- The index in the array.
+ *		    data: (void *) -- The data to populate the array with.
+ *
+ * RETURN:	    int -- 0 if successful, -1 if something bad happened
+ *
+ * NOTES:	    O(logn), E(1) for multiple sequential accesses.
+ ***/
 int darray_set(darray * array, int index, void * data)
 {
-  /* TODO: darray_set */
-  return -1;
+  if (array == NULL || index < 0 || data == NULL)
+    return -1;
+
+  /* Get the index */
+  listelmt * l = array->buckets->head;
+  int num = ((int)floor(log2(index)) >> 1) & 0xfe;
+
+  /* Figure out if we've been here before */
+  if (num == array->llanding && array->last != NULL)
+    l = array->last;
+  else
+    for (int i = num; i >= 0 && l != NULL; i--)
+      l = l->next;
+
+  if (l == NULL)
+    return -1;
+
+  array->llanding = num;
+  array->last = l;
+  ((void **)l->data)[index - num] = data;
+  return 0;
 }
 
 void darray_destroy(darray ** array)

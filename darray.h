@@ -8,7 +8,7 @@
  *
  * CREATED:	    04/16/2018
  *
- * LAST EDITED:	    04/29/2018
+ * LAST EDITED:	    06/04/2018
  ***/
 
 #ifndef __ET_DARRAY_H__
@@ -24,14 +24,21 @@
  * MACRO DEFINITIONS
  ***/
 
+/* The number of non-NULL elements in the array.
+ * This is an important distinction from darray_largest.
+ */
 #define darray_size(darray) ((darray)->size)
 
-/* The number of stairs until we reach the next landing */
-#define darray_stairs(darray) ((darray)->stairs)
+/* The largest index in the array pointing to a non-NULL element. */
+#define darray_largest(darray) ((darray)->largest)
 
-/* If we fell from our current height, the landing that we would end up on. */
-#define darray_landing(darray) ((darray)->landings)
+/* The number of landings in the array */
+#define darray_landings(darray) ((darray)->landings)
 
+/* The number returned by this macro is the total number of locations that
+ * are currently allocated to the array. This is not the total amount of memory
+ * consumed by the array.
+ */
 #define darray_capacity(darray) ((2 ** ((darray)->landings + 2)) - 8)
 
 /******************************************************************************
@@ -44,7 +51,7 @@ typedef struct {
   int size;
   listelmt * last;
   int llanding;
-  int stairs;
+  int largest;
   int landings;
 
 } darray;

@@ -7,7 +7,7 @@
  *
  * CREATED:	    04/16/2018
  *
- * LAST EDITED:	    04/22/2018
+ * LAST EDITED:	    06/04/2018
  ***/
 
 /******************************************************************************
@@ -131,7 +131,8 @@ int main()
 	  test_get()	    ? FAIL"Fail"NC : PASS"Pass"NC,
 	  test_set()	    ? FAIL"Fail"NC : PASS"Pass"NC,
 	  test_create()	    ? FAIL"Fail"NC : PASS"Pass"NC,
-	  test_destroy()    ? FAIL"Fail"NC : PASS"Pass"NC);
+	  test_destroy()    ? FAIL"Fail"NC : PASS"Pass"NC
+	  );
 
 #ifdef CONFIG_TEST_LOG
   fprintf(logfile, "\nFailures: %d\nEND OF LOG\n", failures);
@@ -163,8 +164,10 @@ static int test_get() {
 
   /* Test 1 -- NULL input */
   darray * array = NULL;
+  void * data = NULL;
   if (darray_get(array, 0) != NULL)
     log_fail(Line":test_get(1): not NULL");
+  darray_destroy(&array);
 
   /* Test 2 -- index less than 0 */
   if ((array = prep_darray(0)) == NULL)
@@ -173,24 +176,23 @@ static int test_get() {
     log_fail(Line":test_get(2): should be NULL");
 
   /* Test 3 -- get(0) is valid */
-  if (darray_get(array, 0) == NULL
-      || *(int *)darray_get(array, 0) != 9)
+  if ((data = darray_get(array, 0)) == NULL
+      || *(int *)data != 9)
     log_fail(Line":test_get(3): should be 9");
 
   /* Test 4 -- get(1) is valid */
-  if (darray_get(array, 1) == NULL
-      || *(int *)darray_get(array, 1) != 8)
+  if ((data = darray_get(array, 1)) == NULL
+      || *(int *)data != 8)
     log_fail(Line":test_get(4): should be 8");
 
-  /* Test 5 -- get(size + 1) == 0 */
-  if (darray_get(array, darray_size(array) + 1) == NULL
-      || *(int *)darray_get(array, darray_size(array) + 1) != 0)
+  /* Test 5 -- get(size + 1) == NULL */
+  if (darray_get(array, darray_size(array) + 1) != NULL
+      && *(int *)darray_get(array, darray_size(array) + 1) != 0)
     log_fail(Line":test_get(5): should be 0");
 
   /* Test 6 -- get(size + 512) == 0 */
   int old = array->landings;
-  if (darray_get(array, darray_size(array) + 512) == NULL
-      || *(int *)darray_get(array, darray_size(array) + 512) != 0)
+  if (darray_get(array, darray_largest(array) + 512) != NULL)
     log_fail(Line":test_get(6): should be 0");
   if (array->landings != old)
     log_fail(Line":test_get(6): changed landings");
@@ -246,18 +248,18 @@ static int test_set() {
     log_fail(Line":test_set(3): array[1] should be 12.");
 
   /* Test 4 */
-  if (darray_set(array, darray_size(array) + 1, &num) != 0)
+  if (darray_set(array, darray_largest(array) + 1, &num) != 0)
     log_fail(Line":test_set(4): darray_set did not return 0.");
-  if (darray_get(array, darray_size(array) - 1) == NULL
-      || *(int *)darray_get(array, darray_size(array) - 1) != 12)
+  if (darray_get(array, darray_largest(array)) == NULL
+      || *(int *)darray_get(array, darray_largest(array)) != 12)
     log_fail(Line":test_set(4): the last entry should be 12.");
 
   /* Test 5 */
   int onum = 15;
-  if (darray_set(array, darray_size(array) + 512, &onum) != 0)
+  if (darray_set(array, darray_largest(array) + 512, &onum) != 0)
     log_fail(Line":test_set(5): darray_set did not return 0.");
-  if (darray_get(array, darray_size(array) - 1) == NULL
-      || *(int *)darray_get(array, darray_size(array) - 1) != 15)
+  if (darray_get(array, darray_largest(array)) == NULL
+      || *(int *)darray_get(array, darray_largest(array)) != 15)
     log_fail(Line":test_set(5): the last entry should be 15.");
 
   /* landings = NULL; set(0) <-- set(0) */
@@ -287,16 +289,19 @@ static int test_set() {
 static int test_create() {
 
   /* Test 1 */
-  if (darray_create(NULL) == NULL)
+  darray * array = NULL;
+  int * data = NULL;
+  if ((array = darray_create(NULL)) == NULL)
     log_fail(Line":test_create(1): darray_create returned NULL.");
+  darray_destroy(&array);
 
   /* Test 2 */
-  darray * array = NULL;
-  if ((array = darray_create(free)) == NULL)
-    log_fail(Line":test_create(2): darray_create returned NULL.");
-  if (darray_get(array, 0) == NULL
-      || *(int *)darray_get(array, 0) != 9)
-    log_fail(Line":test_create(2): array[0] should be 9.")
+  if ((array = prep_darray(0)) == NULL)
+    log_fail("\tby "Line":test_create(2)");
+  if ((data = (int *)darray_get(array, 0)) == NULL
+      || *data != 9)
+    log_fail(Line":test_create(2): array[0] should be 9.");
+  darray_destroy(&array);
 
   return 0;
 }
@@ -354,11 +359,14 @@ static darray * prep_darray(int random)
     return NULL;
   }
 
-  int tmp[] = {9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
+  static int tmp[] = {9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
 
   int * pNum = NULL;
   for (int i = 0; i < 10; i++) {
-    pNum = malloc(sizeof(int));
+    if ((pNum = malloc(sizeof(int))) == NULL) {
+      log(Line":prep_darray: malloc returned NULL\n");
+      return NULL;
+    }
     if (random)
       *pNum = rand() % 10;
     else

@@ -53,6 +53,7 @@ typedef struct {
   int llanding;
   int largest;
   int landings;
+  void (*destroy)(void *);
 
 } darray;
 

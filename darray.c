@@ -4,6 +4,7 @@
  * AUTHOR:	    Ethan D. Twardy
  *
  * DESCRIPTION:	    C source file for the Dynamic Array abstract type.
+ *		    TODO: Valgrind analysis and memleak fixes.
  *
  * CREATED:	    04/16/2018
  *
@@ -26,6 +27,7 @@
  ***/
 
 #define Calculate(x) ((int)floor(log((x)/4 + 2) / log(2)) - 1)
+#define Index(i, x) ((i) - ((int)pow(2.0, (num) + 3.0) - 8))
 
 /******************************************************************************
  * STATIC FUNCTION PROTOTYPES
@@ -61,10 +63,11 @@ darray * darray_create(void (*destroy)(void *))
     .last = NULL,
     .llanding = 0,
     .largest = 0,
-    .landings = 0
+    .landings = 0,
+    .destroy = destroy
   };
 
-  if ((array->buckets = list_create(destroy)) == NULL) {
+  if ((array->buckets = list_create(free)) == NULL) {
     free(array);
     return NULL;
   }
@@ -98,7 +101,7 @@ void * darray_get(darray * array, int index)
 
   array->llanding = num;
   array->last = l;
-  return ((void **)l->data)[index - num];
+  return ((void **)l->data)[Index(index, num)];
 }
 
 /******************************************************************************
@@ -135,14 +138,55 @@ int darray_set(darray * array, int index, void * data)
   array->llanding = num;
   array->last = l;
   array->size++;
-  ((void **)l->data)[index - num] = data;
+  ((void **)l->data)[Index(index, num)] = data;
   return 0;
 }
 
+/******************************************************************************
+ * FUNCTION:	    darray_destroy
+ *
+ * DESCRIPTION:	    This function frees all memory which has been internally
+ *		    associated with the array. If a function was passed to the
+ *		    function darray_create() when the list was created, this
+ *		    function will invoke it on all non-NULL entries in the
+ *		    array. This is useful, for instance, in freeing user memory
+ *		    when it is no longer needed, or notifying a structure of an
+ *		    event. Please note that the user function will be called on
+ *		    ONLY the non-NULL elements in the array. This is to
+ *		    mitigate the time spent inside of this function.
+ *
+ * ARGUMENTS:	    array: (darray **) -- Pointer to the array to destroy.
+ *
+ * RETURN:	    void
+ *
+ * NOTES:	    TODO: Implement darray->min and darray_min()
+ *		    TODO: Implement bucket->containing
+ *			The number of non-NULL elements in the array
+ *		    TODO: Make the size of the initial bucket configurable
+ *			(via a macro)
+ ***/
 void darray_destroy(darray ** array)
 {
-  /* TODO: darray_destroy */
-  return;
+  if (array == NULL || *array == NULL)
+    return;
+
+  listelmt * l = NULL;
+  int i = 8;
+  for (l = (*array)->buckets->head; l != NULL; l = l->next) {
+    if ((*array)->destroy != NULL) {
+      for (int j = 0; j < i; j++) {
+	if (((void **)l->data)[j] != NULL) {
+	  (*array)->destroy(((void **)l->data)[j]);
+	}
+      }
+    }
+
+    i <<= 1;
+  }
+
+  list_destroy(&((*array)->buckets));
+  free(*array);
+  *array = NULL;
 }
 
 /******************************************************************************

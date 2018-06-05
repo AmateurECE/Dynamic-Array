@@ -1,3 +1,7 @@
-darray.c: darray_set | id:21cd2ed51173ee99f7c8b87c4715369dc3428a1f
-darray.c: darray_destroy | id:695b0107c5e928dd0b372769948f178293309da3
+darray.c: Check the floating point environment here | id:1fb211549b9bb81cdeff6183819b42d826d074c5
+darray.c: Update to decrease the size of the array if updating | id:3c037f479a0da23b3443b8c26f75d08e0535910d
+darray.c: Valgrind analysis and memleak fixes. | id:5cad265d797fb39a358594839dfb3f77fda62572
+darray.c: Make the size of the initial bucket configurable | id:7e92bb78eda53debc9da14a920417de2df25859b
+darray.c: Implement darray->min and darray_min() | id:7fe11097c29b2a9926c821d34d39657cda2402e9
 Singly-Linked-List/list.c: Rework testing | id:aad24410d6ebf699873f332c241572da18fefc28
+darray.c: Implement bucket->containing | id:aaf5d164330011c3692575e672092f77b797d5b1
